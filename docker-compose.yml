@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile.inference_api
     ports:
       - "8063:8063"
-
+    restart: always
 
   chat_app:
     build:
@@ -13,4 +13,4 @@ services:
       dockerfile: Dockerfile.chat_app
     ports:
       - "8501:8501"
-
+    restart: always

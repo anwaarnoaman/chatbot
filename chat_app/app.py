@@ -1,10 +1,12 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import requests
 import json
 import re
+import os
 
 # --- Default Settings ---
-DEFAULT_API_URL = "http://localhost:8063"
+DEFAULT_API_URL = "https://avrioc-inference.jhingaai.com"
 DEFAULT_SYSTEM_PROMPT = """
 You are an intelligent assistant capable of answering a wide range of questions using your internal knowledge.
 
@@ -90,49 +92,68 @@ def display_assistant_response(raw_text):
 
 # --- Main App ---
 def main():
-    st.title("Chatbot")
+    st.set_page_config(page_title="Avrioc Chatbot", layout="wide")
+    st.title("Avrioc casestudy chatbot")
 
-    # Sidebar
-    with st.sidebar:
-        st.header("Settings")
-        st.session_state.api_url = st.text_input("API URL", value=st.session_state.api_url)
-        st.session_state.hybrid_search = st.checkbox("Enable Internet Search", value=st.session_state.hybrid_search)
+    # Sidebar navigation
+    page = st.sidebar.radio("Navigation", ["Documentation", "Chat"])
 
-        if st.button("Show/Hide System Prompt"):
+    # Shared Sidebar Settings (for Chat)
+    if page == "Chat":
+        st.sidebar.header("Chat Settings")
+        st.session_state.api_url = st.sidebar.text_input("API URL", value=st.session_state.api_url)
+        st.session_state.hybrid_search = st.sidebar.checkbox("Enable Internet Search", value=st.session_state.hybrid_search)
+
+        if st.sidebar.button("Show/Hide System Prompt"):
             st.session_state.show_system_prompt = not st.session_state.show_system_prompt
 
         if st.session_state.show_system_prompt:
-            st.subheader("System Prompt (Editable)")
-            new_prompt = st.text_area("System Prompt", value=st.session_state.system_prompt, height=400)
+            st.sidebar.subheader("System Prompt (Editable)")
+            new_prompt = st.sidebar.text_area("System Prompt", value=st.session_state.system_prompt, height=400)
             if new_prompt != st.session_state.system_prompt:
                 st.session_state.system_prompt = new_prompt
-                st.success("System prompt updated!")
+                st.sidebar.success("System prompt updated!")
 
-    # Chat History
-    for msg in st.session_state.messages:
-        with st.chat_message(msg["role"]):
-            st.markdown(msg["content"])
+    # --- Documentation Page ---
+    if page == "Documentation":
+        st.header("Documentation")
+        try:
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            doc_path = os.path.join(base_dir, "documentation.html")
+            with open(doc_path, "r", encoding="utf-8") as f:
+                html_content = f.read()
+            components.html(html_content, height=800, scrolling=True)
+        except FileNotFoundError:
+            st.error("documentation.html file not found!")
 
-    # Input prompt
-    prompt = st.chat_input("You:", disabled=st.session_state.input_disabled)
-    if prompt:
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.markdown(prompt)
+    # --- Chat Page ---
+    elif page == "Chat":
+        for msg in st.session_state.messages:
+            with st.chat_message(msg["role"]):
+                st.markdown(msg["content"])
 
-        st.session_state.input_disabled = True
-        assistant_message = ""
-        placeholder = st.empty()
+        prompt = st.chat_input("You:", disabled=st.session_state.input_disabled)
+        if prompt:
+            st.session_state.messages.append({"role": "user", "content": prompt})
+            with st.chat_message("user"):
+                st.markdown(prompt)
 
-        with st.spinner("Assistant is typing..."):
-            for chunk in send_message_to_api(st.session_state.messages, stream=True, hybrid_search=st.session_state.hybrid_search):
-                assistant_message += chunk
-                placeholder.empty()
-                with placeholder.chat_message("assistant"):
-                    display_assistant_response(assistant_message)
+            st.session_state.input_disabled = True
+            assistant_message = ""
+            placeholder = st.empty()
 
-        st.session_state.messages.append({"role": "assistant", "content": assistant_message})
-        st.session_state.input_disabled = False
+            with st.spinner("Assistant is typing..."):
+                for chunk in send_message_to_api(
+                    st.session_state.messages, stream=True, hybrid_search=st.session_state.hybrid_search
+                ):
+                    assistant_message += chunk
+                    placeholder.empty()
+                    with placeholder.chat_message("assistant"):
+                        display_assistant_response(assistant_message)
+
+            st.session_state.messages.append({"role": "assistant", "content": assistant_message})
+            st.session_state.input_disabled = False
+
 
 if __name__ == "__main__":
     main()

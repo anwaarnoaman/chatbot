@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Avrioc Chatbot - Project Documentation</title>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+            background-color: #f9f9f9;
+            color: #222;
+            max-width: 900px;
+        }
+        h1, h2, h3 {
+            color: #004a99;
+        }
+        code {
+            background-color: #eee;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        pre {
+            background-color: #eee;
+            padding: 10px;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+        ul {
+            margin-top: 0;
+        }
+        a {
+            color: #004a99;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        address {
+            margin-top: 20px;
+            font-style: normal;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <h1>Avrioc Chatbot Project Documentation</h1>
+
+    <h2>Project Hosting Details</h2>
+    <p>
+        The core large language model (LLM) is hosted on a GPU-powered cloud server to ensure low latency and high throughput. For this project, I chose the <strong>DevStral:24B</strong> model from Ollama, known for its high-quality performance and versatility.
+    </p>
+    <p>
+        More details about the model are available here:  
+        <a href="https://ollama.com/library/devstral" target="_blank" rel="noopener noreferrer">https://ollama.com/library/devstral</a>
+    </p>
+    <p>
+        The LLM inference API endpoint is hosted at:  
+        <a href="https://avrioc-inference.jhingaai.com" target="_blank" rel="noopener noreferrer">https://avrioc-inference.jhingaai.com</a>
+    </p>
+    <p>
+        The chat interface frontend is deployed separately for end-users at:  
+        <a href="https://avrioc-chat.jhingaai.com" target="_blank" rel="noopener noreferrer">https://avrioc-chat.jhingaai.com</a>
+    </p>
+    <p>
+        The full project source code is publicly available at:  
+        <a href="https://github.com/anwaarnoaman/chatbot" target="_blank" rel="noopener noreferrer">https://github.com/anwaarnoaman/chatbot</a>
+    </p>
+
+    <h2>Chat Interface Setup</h2>
+    <p>
+        The frontend is built using <code>Streamlit</code>, offering an interactive chat interface with message history, editable system prompt, and user-configurable settings. To set up the frontend locally:
+    </p>
+    <ol>
+        <li>Clone the project repository from GitHub.</li>
+        <li>Install dependencies using <code>pip install -r requirements.txt</code>.</li>
+        <li>Run the application with <code>streamlit run app.py</code>.</li>
+        <li>Configure the API URL in the sidebar to point to your hosted LLM inference endpoint if needed.</li>
+    </ol>
+    <p>
+        The interface supports streaming token responses from the backend API for a real-time typing effect, enhancing user experience.
+    </p>
+
+    <h2>Decision Logic: When to Use LLM vs. Internet Search Tool</h2>
+    <p>
+        This project implements a hybrid search strategy controlled by a <code>hybrid_search</code> flag:
+    </p>
+    <ul>
+        <li><strong>LLM-only answers:</strong> Used when the question is general knowledge, timeless, or well-covered in the model's training data (e.g., definitions, scientific facts, instructions).</li>
+        <li><strong>Internet Search Tool:</strong> Triggered for questions about recent, breaking news, live data (e.g., stock prices, weather, sports scores), or when the model lacks confidence.</li>
+    </ul>
+    <p>
+        The assistant dynamically evaluates user input and decides whether to respond directly or invoke the <code>internet_search_tool</code>, which queries Google's Serper API for fresh data.
+    </p>
+
+    <h2>Design Decisions and Integration Details</h2>
+    <h3>LLM and Tool Integration</h3>
+    <p>
+        The LLM is integrated with a tool-binding mechanism that allows it to emit special tool call messages. When such calls are detected, the corresponding tool is executed, and results are fed back to the LLM for context-aware response generation.
+    </p>
+
+    <h3>Streaming Tokens</h3>
+    <p>
+        Streaming support is implemented via the backend's <code>/chat/stream</code> endpoint. The frontend processes token chunks incrementally, updating the chat interface in real time. This approach improves responsiveness and user experience.
+    </p>
+
+    <h3>API Response Handling</h3>
+    <p>
+        Backend responses include Markdown-formatted answers. When tools are used, a clearly formatted <code>Sources</code> section lists URLs as a JSON-style array. The frontend parses this to optionally display source links to users.
+    </p>
+
+    <h2>Summary</h2>
+    <p>
+        This project combines a powerful LLM backend with flexible tool integration to deliver accurate, up-to-date, and context-aware chatbot answers. The hybrid search strategy ensures reliability by augmenting the model's internal knowledge with real-time internet data when necessary, wrapped in a user-friendly Streamlit interface.
+    </p>
+
+    <h2>Contact</h2>
+    <address>
+        <strong>Noaman Anwaar</strong><br />
+        Email: <a href="mailto:Anwaarnoaman@gmail.com">Anwaarnoaman@gmail.com</a><br />
+        Phone: +971 55 362 8617<br />
+        WhatsApp: +971 55 362 8617
+    </address>
+</body>
+</html>
