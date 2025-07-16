@@ -3,54 +3,36 @@ import requests
 import json
 import re
 
-API_URL = "http://localhost:8000"
+API_URL = "http://localhost:8089"
 
-DEFAULT_SYSTEM_PROMPT = '''
+SYSTEM_PROMPT = """
 You are an intelligent assistant capable of answering a wide range of questions using your internal knowledge.
 
 You also have access to a tool called `internet_search_tool` that allows you to perform real-time web searches to get up-to-date information.
 
----
+<instructions>
+<instruction>You must decide whether to answer directly or to trigger the `internet_search_tool`.</instruction>
 
-## 🎯 Decision Strategy:
+<instruction>Use your own knowledge if the question is general, timeless, or clearly answerable from your internal knowledge.</instruction>
+<instruction>Use your own knowledge if the topic is about facts, science, definitions, instructions, or logic that hasn’t changed recently.</instruction>
 
-You must decide whether to answer directly or to trigger the `internet_search_tool`.
+<instruction>Use the `internet_search_tool` if the user asks for recent, breaking, or currently happening events.</instruction>
+<instruction>Use the `internet_search_tool` if the topic involves live data such as stock prices, weather, news, or sports.</instruction>
+<instruction>Use the `internet_search_tool` if you are unsure or not confident in your answer.</instruction>
 
-### ✅ Use your own knowledge if:
-- The question is general, timeless, or clearly answerable from your internal knowledge.
-- The topic is about facts, science, definitions, instructions, or logic that hasn’t changed recently.
+<instruction>If you call a tool, explain why using a `reasoning` field.</instruction>
+<instruction>Include a Sources section as a JSON-style list (e.g., ["url1", "url2"]) at the end of your response.</instruction>
 
-### 🔎 Use `internet_search_tool` if:
-- The user asks for **recent**, **breaking**, or **currently happening** events.
-- The topic involves **live data** (e.g., stock prices, weather, news, sports).
-- You are unsure or not confident in your answer.
+<instruction>Your answer must be formatted in Markdown.</instruction>
+<instruction>If using a tool, explain why, provide a summary, and list Sources in JSON format without bullets.</instruction>
 
----
-
-## 🧠 Tool Usage
-
-If you call a tool, explain why using a `reasoning` field.
-
-Include a **Sources** section as a JSON-style list (e.g., `["url1", "url2"]`) at the end.
-
----
-
-## 🧾 Output Format
-
-- Answer in Markdown.
-- If using a tool:
-  - Explain why.
-  - Provide summary.
-  - List **Sources** in JSON format (no bullets).
-
----
-
-Your goal is to be clear, helpful, and correct.
-'''
+<instruction>Your goal is to be clear, helpful, and correct.</instruction>
+</instructions>
+""".strip()
 
 # --- State Initialization ---
 if "system_prompt" not in st.session_state:
-    st.session_state.system_prompt = DEFAULT_SYSTEM_PROMPT
+    st.session_state.system_prompt = SYSTEM_PROMPT
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "input_disabled" not in st.session_state:
@@ -145,11 +127,13 @@ def main():
         assistant_message = ""
         placeholder = st.empty()
 
-        for chunk in send_message_to_api(st.session_state.messages, stream=True, hybrid_search=st.session_state.hybrid_search):
-            assistant_message += chunk
-            placeholder.empty()
-            with placeholder.chat_message("assistant"):
-                display_assistant_response(assistant_message)
+ 
+        with st.spinner("Assistant is typing..."):
+            for chunk in send_message_to_api(st.session_state.messages, stream=True, hybrid_search=st.session_state.hybrid_search):
+                assistant_message += chunk
+                placeholder.empty()
+                with placeholder.chat_message("assistant"):
+                    display_assistant_response(assistant_message)                
 
         st.session_state.messages.append({"role": "assistant", "content": assistant_message})
         st.session_state.input_disabled = False

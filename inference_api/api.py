@@ -51,16 +51,19 @@ async def chat_endpoint(request: Request):
 
 
 
-from fastapi.responses import StreamingResponse
+import re
+
+knowledge_tag_pattern = re.compile(r'<knowledge>.*?</knowledge>', re.DOTALL)
+
 async def event_stream(state, chat_agent: ChatAgentGraph, config=None):
-    loop = asyncio.get_running_loop()
-    gen = chat_agent.stream_response(state, config=config)
+    gen = chat_agent.stream_response(state, config=config)  # normal generator
 
-    for chunk in gen:
-        sse_chunk = f"data: {chunk}\n\n"
-        yield sse_chunk.encode('utf-8')
+    for chunk in gen:  # use normal for, not async for
+        # Remove <knowledge>...</knowledge> blocks (if you want)
+        filtered_chunk = knowledge_tag_pattern.sub('', chunk)
+        if filtered_chunk.strip(): 
+            yield f"data: {filtered_chunk}\n\n"
         await asyncio.sleep(0)
-
 
         
 @app.post("/chat/stream")

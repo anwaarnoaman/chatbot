@@ -71,7 +71,7 @@ class ChatAgentGraph:
                 
                 
                 tool_msg = ToolMessage(
-                    content=json.dumps(tool_response, indent=2),
+                    content="<knowledge>"+json.dumps(tool_response, indent=2)+ "</knowledge>",
                     tool_call_id=tool_call["id"]
                 )
                 tool_messages.append(tool_msg)
