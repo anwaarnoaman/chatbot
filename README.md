@@ -69,7 +69,7 @@ Ensure chat_app connects to:
 
 cloud infrence endpoint 
 
-https://avrioc_inference.jhingaai.com/
+https://avrioc-inference.jhingaai.com/
 
 if running locally 
 http://localhost:8063
