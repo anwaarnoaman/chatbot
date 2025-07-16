@@ -1,0 +1,16 @@
+# inference_api/Dockerfile
+
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# Copy only necessary files
+COPY ../requirements.txt ./requirements.txt
+COPY . .
+
+RUN pip install --no-cache-dir --upgrade pip
+RUN pip install --no-cache-dir -r requirements.txt
+
+EXPOSE 8063
+
+CMD ["uvicorn", "inference_api.app:app", "--host", "0.0.0.0", "--port", "8063", "--reload"]

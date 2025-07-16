@@ -1,0 +1,7 @@
+uvicorn
+fastapi
+langchain_core
+langchain_ollama
+langgraph
+langchain
+streamlit

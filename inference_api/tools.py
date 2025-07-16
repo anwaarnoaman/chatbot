@@ -1,6 +1,6 @@
 
 import logging
-from agent_config import Config
+from inference_api.agent_config import Config
  
 import http.client
 import json

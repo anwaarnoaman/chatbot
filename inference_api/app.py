@@ -2,19 +2,16 @@ from fastapi import FastAPI, Request
 from pydantic import BaseModel
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 from fastapi.responses import StreamingResponse
-import asyncio
-import anyio  # you may need to install it: pip install anyio
-
+import asyncio 
 app = FastAPI()
-
 class MessageIn(BaseModel):
     role: str
     content: str
 
-from agent import ChatAgentGraph
-from tools import InternetSearchTool
-from agent_config import Config
-from models import create_llm
+from inference_api.agent import ChatAgentGraph
+from inference_api.tools import InternetSearchTool
+from inference_api.agent_config import Config
+from inference_api.models import create_llm
 
 llm = create_llm(Config.MODEL)
 search_tool = InternetSearchTool()

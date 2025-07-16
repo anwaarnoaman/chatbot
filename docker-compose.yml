@@ -1,0 +1,16 @@
+services:
+  inference_api:
+    build:
+      context: .
+      dockerfile: Dockerfile.inference_api
+    ports:
+      - "8063:8063"
+
+
+  chat_app:
+    build:
+      context: .
+      dockerfile: Dockerfile.chat_app
+    ports:
+      - "8501:8501"
+
