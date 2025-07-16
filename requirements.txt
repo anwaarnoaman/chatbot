@@ -1,7 +1,10 @@
-uvicorn
-fastapi
-langchain_core
-langchain_ollama
+fastapi 
+uvicorn 
+langchain 
+langchain-community 
+langchain-ollama
 langgraph
-langchain
-streamlit
+sse-starlette
+rich
+streamlit 
+requests
